@@ -170,7 +170,7 @@ class EntityLinkingTrainer(Trainer):
 
 
 def _compute_metrics(p: EvalPrediction, label_names: list[str]) -> dict[str, Any]:
-    _, scores = p.predictions
+    loss, scores = p.predictions
     preds = scores.argmax(axis=1).ravel()
     labels = p.label_ids.ravel()
     mask = labels != -100
@@ -181,7 +181,7 @@ def _compute_metrics(p: EvalPrediction, label_names: list[str]) -> dict[str, Any
     num_golds = mask.sum().item()
     recall = num_corrects / num_golds if num_golds > 0 else float("nan")
 
-    return {"recall": recall}
+    return {"loss": loss.sum(), "recall": recall}
 
 
 def _compute_loss(model: PreTrainedModel, inputs: BatchEncoding, measure: str, temperature: float) -> EntityLinkingOutput:
