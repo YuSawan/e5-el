@@ -58,8 +58,6 @@ class Preprocessor:
             self,
             tokenizer: PreTrainedTokenizerBase,
             labels: list[str],
-            max_entity_length: int,
-            max_mention_length: int,
             ent_start_token: str = '[START_ENT]',
             ent_end_token: str = '[END_ENT]',
             task_description: str = "Given a document, retrieve entity descriptions that are relevant to the mention located between special tokens '[START_ENT]' and '[END_ENT]'",
@@ -67,8 +65,6 @@ class Preprocessor:
             ) -> None:
         self.tokenizer = tokenizer
         self.model_name = tokenizer.name_or_path
-        self.max_entity_length = max_entity_length
-        self.max_mention_length = max_mention_length
         self.labels = labels
         self.label2id = {label: i for i, label in enumerate(labels)}
         self.id2label = {i: label for i, label in enumerate(labels)}

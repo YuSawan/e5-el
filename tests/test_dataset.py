@@ -35,12 +35,8 @@ class TestPreprocessor:
         preprocessor = Preprocessor(
             tokenizer,
             dictionary.entity_ids,
-            max_entity_length=32,
-            max_mention_length=30,
         )
         assert preprocessor.tokenizer == tokenizer
-        assert preprocessor.max_entity_length == 32
-        assert preprocessor.max_mention_length == 30
         assert preprocessor.labels == dictionary.entity_ids
         assert len(preprocessor.label2id.keys()) == 6
         assert len(preprocessor.id2label.keys()) == 6
@@ -56,8 +52,6 @@ class TestPreprocessor:
         preprocessor = Preprocessor(
             tokenizer,
             dictionary.entity_ids,
-            max_entity_length=32,
-            max_mention_length=30,
             remove_nil=remove_nil
         )
 
@@ -119,8 +113,6 @@ def test_CollatorForEntityLinking(sampling: str) -> None:
     preprocessor = Preprocessor(
         tokenizer,
         dictionary.entity_ids,
-        max_entity_length=32,
-        max_mention_length=30,
     )
     splits = get_splits(raw_datasets, preprocessor, training_args)
 
