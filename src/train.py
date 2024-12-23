@@ -16,17 +16,17 @@ from transformers import (
     set_seed,
 )
 
-from .data import (
+from src.data import (
     CollatorForEntityLinking,
     EntityDictionary,
     Preprocessor,
     get_splits,
     read_dataset,
 )
-from .eval import evaluate, submit_wandb_eval
-from .predict import predict, submit_wandb_predict
-from .retriever import DenseRetriever
-from .training import EntityLinkingTrainer, LoggerCallback, setup_logger
+from src.eval import evaluate, submit_wandb_eval
+from src.predict import predict, submit_wandb_predict
+from src.retriever import DenseRetriever
+from src.training import EntityLinkingTrainer, LoggerCallback, setup_logger
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +40,6 @@ class Arguments:
     model_name: str = "intfloat/multilingual-e5-small"
     cache_dir: Optional[str] = None
     max_context_length: int = 512
-    max_entity_length: int = 32
-    max_mention_length: int = 30
     measure: str = 'cos'
     negative: str = 'inbatch'
     add_nil: bool = False
@@ -60,7 +58,7 @@ def main(args: Arguments, training_args: TrainingArguments) -> None:
     set_seed(training_args.seed)
     config = AutoConfig.from_pretrained(args.model_name)
     cache_dir = args.cache_dir or get_temporary_cache_files_directory()
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name, model_max_length=args.max_context_length)
     tokenizer.add_tokens(['<company>', '</company>'])
     model = AutoModel.from_pretrained(args.model_name, config=config)
     if model.config.vocab_size != len(tokenizer):
@@ -83,8 +81,6 @@ def main(args: Arguments, training_args: TrainingArguments) -> None:
     preprocessor = Preprocessor(
         tokenizer,
         dictionary.entity_ids,
-        args.max_entity_length,
-        args.max_mention_length,
         ent_start_token='<company>',
         ent_end_token='</company>',
         task_description="Given a Japanese news article, retrieve entity descriptions that are relevant to the mention located between special tokens '<company>' and '</company>'",

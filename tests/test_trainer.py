@@ -39,8 +39,6 @@ dictionary = EntityDictionary(
 preprocessor = Preprocessor(
     tokenizer,
     dictionary.entity_ids,
-    max_entity_length=32,
-    max_mention_length=30,
 )
 
 @pytest.mark.parametrize('sampling', ['inbatch', 'dense'])
