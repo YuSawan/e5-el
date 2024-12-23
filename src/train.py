@@ -16,17 +16,17 @@ from transformers import (
     set_seed,
 )
 
-from .data import (
+from src.data import (
     CollatorForEntityLinking,
     EntityDictionary,
     Preprocessor,
     get_splits,
     read_dataset,
 )
-from .eval import evaluate, submit_wandb_eval
-from .predict import predict, submit_wandb_predict
-from .retriever import DenseRetriever
-from .training import EntityLinkingTrainer, LoggerCallback, setup_logger
+from src.eval import evaluate, submit_wandb_eval
+from src.predict import predict, submit_wandb_predict
+from src.retriever import DenseRetriever
+from src.training import EntityLinkingTrainer, LoggerCallback, setup_logger
 
 logger = logging.getLogger(__name__)
 
