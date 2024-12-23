@@ -1,2 +1,2 @@
-# E5-EL
+# e5-el
 Entity Linking using E5

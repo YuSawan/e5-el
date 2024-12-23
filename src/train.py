@@ -186,7 +186,7 @@ def main(args: Arguments, training_args: TrainingArguments) -> None:
 
 
 if __name__ == '__main__':
-    CONFIG_FILE = Path(__file__).parents[2] / "default.conf"
+    CONFIG_FILE = Path(__file__).parents[1] / "default.conf"
     parser = HfArgumentParser((Arguments, TrainingArguments))
     args, training_args = parser.parse_args_into_dataclasses(args_filename=CONFIG_FILE)
     if args.validation_file is None:
