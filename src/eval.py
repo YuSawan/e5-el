@@ -15,7 +15,7 @@ def evaluate(model: PreTrainedModel, dataset: Dataset, retriever: DenseRetriever
     dictionary = retriever.dictionary
     model.to(retriever.device)
 
-    true, tp_1, tp_10, tp_20, tp_50, tp_100 = 0, 0, 0, 0, 0, 0
+    true, tp_1, tp_5, tp_10, tp_20, tp_50, tp_100 = 0, 0, 0, 0, 0, 0, 0
     pbar = tqdm(total=len(dataloader), desc="Eval")
     for batch, labels in dataloader:
         pbar.update()
@@ -33,12 +33,15 @@ def evaluate(model: PreTrainedModel, dataset: Dataset, retriever: DenseRetriever
                         tp_20 += 1
                         if dictionary[idxs[0]].id in indices[:10]:
                             tp_10 += 1
-                            if dictionary[idxs[0]].id in indices[:1]:
-                                tp_1 += 1
+                            if dictionary[idxs[0]].id in indices[:5]:
+                                tp_10 += 1
+                                if dictionary[idxs[0]].id in indices[:1]:
+                                    tp_1 += 1
     pbar.close()
 
     return {
         "tp_1": tp_1,
+        "tp_5": tp_5,
         "tp_10": tp_10,
         "tp_20": tp_20,
         "tp_50": tp_50,
@@ -48,6 +51,7 @@ def evaluate(model: PreTrainedModel, dataset: Dataset, retriever: DenseRetriever
 
 def submit_wandb_eval(metrics: dict[str, int]) -> None:
     wandb.log({"R@1": metrics["tp_1"]/metrics["true"]})
+    wandb.log({"R@5": metrics["tp_1"]/metrics["true"]})
     wandb.log({"R@10": metrics["tp_10"]/metrics["true"]})
     wandb.log({"R@20": metrics["tp_20"]/metrics["true"]})
     wandb.log({"R@50": metrics["tp_50"]/metrics["true"]})
