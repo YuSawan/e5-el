@@ -149,6 +149,7 @@ def main(args: Arguments, training_args: TrainingArguments) -> None:
         if training_args.do_train:
             submit_wandb_eval(results)
         logger.info(f"R@1: {round(results['tp_1']/results['true'], 5)} ({results['tp_1']}/{results['true']})")
+        logger.info(f"R@5: {round(results['tp_5']/results['true'], 5)} ({results['tp_5']}/{results['true']})")
         logger.info(f"R@10: {round(results['tp_10']/results['true'], 5)} ({results['tp_10']}/{results['true']})")
         logger.info(f"R@20: {round(results['tp_20']/results['true'], 5)} ({results['tp_20']}/{results['true']})")
         logger.info(f"R@50: {round(results['tp_50']/results['true'], 5)} ({results['tp_50']}/{results['true']})")
