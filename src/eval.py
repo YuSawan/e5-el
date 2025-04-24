@@ -34,7 +34,7 @@ def evaluate(model: PreTrainedModel, dataset: Dataset, retriever: DenseRetriever
                         if dictionary[idxs[0]].id in indices[:10]:
                             tp_10 += 1
                             if dictionary[idxs[0]].id in indices[:5]:
-                                tp_10 += 1
+                                tp_5 += 1
                                 if dictionary[idxs[0]].id in indices[:1]:
                                     tp_1 += 1
     pbar.close()
