@@ -12,7 +12,7 @@ negative='dense'
 
 for seed in 0 21 42; do
 for measure in 'cos' 'ip' 'l2'; do
-base_output_dir = ${output_dir}/${seed}/${measure}
+base_output_dir=${output_dir}/${seed}/${measure}
 mkdir -p ${base_output_dir}
 
 uv run python src/cli/run.py \
