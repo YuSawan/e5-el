@@ -55,6 +55,6 @@ save_total_limit: 3 #maximum amount of checkpoints to save
 
 # Evaluation
 eval_strategy: 'epoch'
-metric_for_best_model: 'evall_recall'
+metric_for_best_model: 'recall'
 load_best_model_at_end: true
 eval_on_start: false

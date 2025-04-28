@@ -23,5 +23,6 @@ uv run python src/cli/run.py \
     --measure ${measure} \
     --negative ${negative} \
     --seed ${seed} \
-    --output_dir ${base_output_dir}/direct
+    --output_dir ${base_output_dir}/direct \
+    --run_name ${base_output_dir}/direct
 done

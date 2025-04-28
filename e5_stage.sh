@@ -21,7 +21,8 @@ uv run python src/cli/run.py \
     --config_file ${configpath} \
     --measure ${measure} \
     --seed ${seed} \
-    --output_dir ${base_output_dir}/first
+    --output_dir ${base_output_dir}/first \
+    --run_name ${base_output_dir}/first
 
 uv run python src/cli/run.py \
     --do_train \
@@ -32,6 +33,7 @@ uv run python src/cli/run.py \
     --measure ${measure} \
     --seed ${seed} \
     --prev_path ${base_output_dir}/first \
-    --output_dir ${base_output_dir}/second
+    --output_dir ${base_output_dir}/second \
+    --run_name ${base_output_dir}/second
 done
 done
