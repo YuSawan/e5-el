@@ -1,9 +1,6 @@
 import json
 import logging
 import os
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Optional
 
 import torch
 from datasets.fingerprint import get_temporary_cache_files_directory
@@ -11,11 +8,11 @@ from transformers import (
     AutoConfig,
     AutoModel,
     AutoTokenizer,
-    HfArgumentParser,
     TrainingArguments,
     set_seed,
 )
 
+from src.argparser import DatasetArguments, ModelArguments, parse_args
 from src.data import (
     CollatorForEntityLinking,
     EntityDictionary,
@@ -31,22 +28,7 @@ from src.training import EntityLinkingTrainer, LoggerCallback, setup_logger
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class Arguments:
-    dictionary_file: str
-    train_file : str
-    validation_file : str
-    test_file: str
-    model_name: str = "intfloat/multilingual-e5-small"
-    cache_dir: Optional[str] = None
-    max_context_length: int = 512
-    measure: str = 'cos'
-    negative: str = 'inbatch'
-    add_nil: bool = False
-    top_k: int = 10
-
-
-def main(args: Arguments, training_args: TrainingArguments) -> None:
+def main(args: DatasetArguments, model_args: ModelArguments, training_args: TrainingArguments) -> None:
     setup_logger(training_args)
     logger.warning(
         f"process rank: {training_args.local_rank}, device: {training_args.device}, n_gpu: {training_args.n_gpu}, "
@@ -56,20 +38,24 @@ def main(args: Arguments, training_args: TrainingArguments) -> None:
     logger.info(f"training args: {training_args}")
 
     set_seed(training_args.seed)
-    config = AutoConfig.from_pretrained(args.model_name)
-    cache_dir = args.cache_dir or get_temporary_cache_files_directory()
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name, model_max_length=args.max_context_length)
-    tokenizer.add_tokens(['<company>', '</company>'])
-    model = AutoModel.from_pretrained(args.model_name, config=config)
-    if model.config.vocab_size != len(tokenizer):
-        model.resize_token_embeddings(len(tokenizer))
+    if model_args.prev_path:
+        tokenizer = AutoTokenizer.from_pretrained(model_args.prev_path)
+        model = AutoModel.from_pretrained(model_args.prev_path)
+    else:
+        config = AutoConfig.from_pretrained(model_args.model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_args.model_name, model_max_length=model_args.model_max_length)
+        tokenizer.add_tokens([model_args.start_ent_token, model_args.end_ent_token])
+        model = AutoModel.from_pretrained(model_args.model_name, config=config)
+        if model.config.vocab_size != len(tokenizer):
+            model.resize_token_embeddings(len(tokenizer))
 
+    cache_dir = args.cache_dir or get_temporary_cache_files_directory()
     dictionary = EntityDictionary(
         tokenizer=tokenizer,
         dictionary_path=args.dictionary_file,
         cache_dir=cache_dir,
         training_arguments=training_args,
-        nil={"description": "該当するエンティティが存在しません。"} if args.add_nil else None
+        nil={"name": model_args.nil_label, "description": model_args.nil_description} if model_args.add_nil else None
     )
 
     raw_datasets = read_dataset(
@@ -81,29 +67,29 @@ def main(args: Arguments, training_args: TrainingArguments) -> None:
     preprocessor = Preprocessor(
         tokenizer,
         dictionary.entity_ids,
-        ent_start_token='<company>',
-        ent_end_token='</company>',
-        task_description="Given a Japanese news article, retrieve entity descriptions that are relevant to the mention located between special tokens '<company>' and '</company>'",
-        remove_nil=False if args.add_nil else True
+        ent_start_token=model_args.start_ent_token,
+        ent_end_token=model_args.end_ent_token,
+        task_description=model_args.task_description,
+        remove_nil=False if model_args.add_nil else True
     )
     splits = get_splits(raw_datasets, preprocessor, training_args)
 
     if training_args.do_train:
-        if args.negative == 'dense':
+        if model_args.negative == 'dense':
             retriever = DenseRetriever(
                 tokenizer,
                 dictionary,
-                measure=args.measure,
+                measure=model_args.measure,
                 batch_size=training_args.eval_batch_size*2,
-                top_k=args.top_k,
+                top_k=model_args.top_k,
                 vector_size=model.encoder.config.hidden_size,
                 device=torch.device(training_args.device) if torch.cuda.is_available() else torch.device('cpu'),
                 training_args=training_args
             )
-        elif args.negative == 'bm25':
+        elif model_args.negative == 'bm25':
             raise NotImplementedError
         else:
-            assert args.negative == 'inbatch'
+            assert model_args.negative == 'inbatch'
             retriever = None
 
         if retriever is not None:
@@ -114,11 +100,11 @@ def main(args: Arguments, training_args: TrainingArguments) -> None:
 
         trainer = EntityLinkingTrainer(
             model = model,
-            measure=args.measure,
+            measure=model_args.measure,
             args=training_args,
             train_dataset = splits['train'],
             eval_dataset = splits['validation'],
-            data_collator = CollatorForEntityLinking(tokenizer, dictionary, negative_sample=args.negative)
+            data_collator = CollatorForEntityLinking(tokenizer, dictionary, negative_sample=model_args.negative)
         )
         trainer.add_callback(LoggerCallback(logger))
 
@@ -139,9 +125,9 @@ def main(args: Arguments, training_args: TrainingArguments) -> None:
         retriever = DenseRetriever(
             tokenizer,
             dictionary,
-            measure=args.measure,
+            measure=model_args.measure,
             batch_size=training_args.eval_batch_size*2,
-            top_k=args.top_k,
+            top_k=model_args.top_k,
             vector_size=model.encoder.config.hidden_size,
             device=torch.device(training_args.device) if torch.cuda.is_available() else torch.device('cpu'),
             training_args=training_args
@@ -161,9 +147,9 @@ def main(args: Arguments, training_args: TrainingArguments) -> None:
             retriever = DenseRetriever(
                 tokenizer,
                 dictionary,
-                measure=args.measure,
+                measure=model_args.measure,
                 batch_size=training_args.eval_batch_size*2,
-                top_k=args.top_k,
+                top_k=model_args.top_k,
                 vector_size=model.encoder.config.hidden_size,
                 device=torch.device(training_args.device) if torch.cuda.is_available() else torch.device('cpu'),
                 training_args=training_args
@@ -171,7 +157,7 @@ def main(args: Arguments, training_args: TrainingArguments) -> None:
         assert isinstance(retriever, DenseRetriever)
         predicts = predict(
             model=model,
-            dataset=splits['validation'].remove_columns('negatives') if args.negative != 'inbatch' else splits['validation'],
+            dataset=splits['validation'].remove_columns('negatives') if model_args.negative != 'inbatch' else splits['validation'],
             retriever=retriever,
             reset_index=False if training_args.do_eval else True
         )
@@ -183,11 +169,12 @@ def main(args: Arguments, training_args: TrainingArguments) -> None:
                 f.write("\n")
 
 
-if __name__ == '__main__':
-    CONFIG_FILE = Path(__file__).parents[1] / "default.conf"
-    parser = HfArgumentParser((Arguments, TrainingArguments))
-    args, training_args = parser.parse_args_into_dataclasses(args_filename=CONFIG_FILE)
+def cli_main() -> None:
+    args, model_args, training_args = parse_args()
     if args.validation_file is None:
         training_args.eval_strategy = "no"
+    main(args, model_args, training_args)
 
-    main(args, training_args)
+
+if __name__ == '__main__':
+    cli_main()

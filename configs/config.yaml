@@ -1,0 +1,59 @@
+# Model Configuration
+model:
+  model_name: "intfloat/multilingual-e5-large" # Hugging Face model
+  model_max_length: 512
+  add_nil: true
+  nil_label: '[NIL]'
+  nil_description: '該当するエンティティが存在しません。"
+  start_ent_token: '<company>'
+  end_ent_token: '</company>'
+  task_description: "Given a Japanese news article, retrieve entity descriptions that are relevant to the mention located between special tokens '<company>' and '</company>'"
+  measure: 'cos' # measure: {'cos': cosine, 'ip': inner-product, 'l2': eucridean}
+  negative: 'inbatch' # negative: {'inbatch': in-batch sampling, 'dense': inbatch+hard negative with DPR, 'bm25': inbatch+hard negative with BM25}
+  top_k: 10 # top_k: Number of hard negative samples
+  prev_path: "none" # Pretrained Model Path: Use None if no pretrained model is being used
+
+# Dataset Configuration
+dataset:
+  train_file: 'train.jsonl'
+  validation_file: 'validation.jsonl'
+  test_file: 'test.jsonl'
+  dictionary_file: 'dictionary.jsonl'
+  cache_dir: "none"
+
+# Dataloader
+remove_unused_columns: false
+
+# Training Parameters
+num_train_epochs: 4
+per_device_train_batch_size: 10
+per_device_eval_batch_size: 20
+lr_scheduler_type: "linear"
+warmup_ratio: 0.06
+
+# Optimizer
+optim: "adamw_torch"
+adam_beta1: 0.9
+adam_beta2: 0.98
+adam_epsilon: 1.e-6
+
+# Learning Rate and weight decay Configuration
+learning_rate: 1.e-5
+weight_decay: 0.01
+max_grad_norm: 0.0
+
+# logging
+log_level: 'info'
+logging_strategy: 'epoch'
+logging_steps: 10
+report_to: 'wandb'
+
+# Save
+save_strategy: 'epoch'
+save_total_limit: 3 #maximum amount of checkpoints to save
+
+# Evaluation
+eval_strategy: 'epoch'
+metric_for_best_model: 'evall_recall'
+load_best_model_at_end: true
+eval_on_start: false
