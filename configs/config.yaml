@@ -11,7 +11,7 @@ model:
   measure: 'cos' # measure: {'cos': cosine, 'ip': inner-product, 'l2': eucridean}
   negative: 'inbatch' # negative: {'inbatch': in-batch sampling, 'dense': inbatch+hard negative with DPR, 'bm25': inbatch+hard negative with BM25}
   top_k: 10 # top_k: Number of hard negative samples
-  prev_path: "none" # Pretrained Model Path: Use None if no pretrained model is being used
+  prev_path: null # Pretrained Model Path: Use None if no pretrained model is being used
 
 # Dataset Configuration
 dataset:
@@ -19,7 +19,7 @@ dataset:
   validation_file: 'validation.jsonl'
   test_file: 'test.jsonl'
   dictionary_file: 'dictionary.jsonl'
-  cache_dir: "none"
+  cache_dir: null
 
 # Dataloader
 remove_unused_columns: false

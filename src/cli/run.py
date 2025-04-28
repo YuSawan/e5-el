@@ -36,6 +36,7 @@ def main(args: DatasetArguments, model_args: ModelArguments, training_args: Trai
         + f"distributed training: {bool(training_args.local_rank != -1)}, 16-bits training: {training_args.fp16}"
     )
     logger.info(f"args: {args}")
+    logger.info(f"model_args: {model_args}")
     logger.info(f"training args: {training_args}")
 
     set_seed(training_args.seed)
