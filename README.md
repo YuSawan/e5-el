@@ -48,7 +48,7 @@ pip install .
 
 #### 1st stage
 ```
-python src/main.py \
+python src/cli/run.py \
     --do_train \
     --config_file configs/config.yaml \
     --output_dir ./initial_output/
@@ -56,7 +56,7 @@ python src/main.py \
 
 #### 2nd stage
 ```
-python src/main.py \
+python src/cli/run.py \
     --do_train \
     --config_file configs/config.yaml \
     --negative dense \
@@ -66,7 +66,7 @@ python src/main.py \
 
 ### Evaluation/Prediction
 ```
-python src/main.py \
+python src/cli/run.py \
     --do_eval \
     --do_predict \
     --config_file configs/config.yaml
