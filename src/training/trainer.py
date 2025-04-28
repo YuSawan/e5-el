@@ -33,7 +33,7 @@ class EntityLinkingOutput(ModelOutput):
 
 
 class EntityLinkingTrainer(Trainer):
-    def __init__(self, measure: str = "cos", temperature: float = 0.01, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, measure: str = "cos", temperature: float = 1.0, *args: Any, **kwargs: Any) -> None:
         kwargs.setdefault("compute_metrics", self._compute_metrics)
         super().__init__(*args, **kwargs)
         self.measure = measure
