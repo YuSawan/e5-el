@@ -114,6 +114,7 @@ def main(args: Arguments, training_args: TrainingArguments) -> None:
 
         trainer = EntityLinkingTrainer(
             model = model,
+            measure=args.measure,
             args=training_args,
             train_dataset = splits['train'],
             eval_dataset = splits['validation'],
