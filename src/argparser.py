@@ -36,6 +36,7 @@ class ModelArguments:
     end_ent_token: str
     task_description: str
     measure: str
+    temperature: float
     negative: str
     top_k: int
     prev_path: Optional[str]

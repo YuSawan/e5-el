@@ -103,6 +103,7 @@ def main(args: DatasetArguments, model_args: ModelArguments, training_args: Trai
         trainer = EntityLinkingTrainer(
             model = model,
             measure=model_args.measure,
+            temperature=model_args.temperature,
             args=training_args,
             train_dataset = splits['train'],
             eval_dataset = splits['validation'],

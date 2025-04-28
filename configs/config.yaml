@@ -9,6 +9,7 @@ model:
   end_ent_token: '</entity>'
   task_description: "Given a Japanese news article, retrieve entity descriptions that are relevant to the mention located between special tokens '<entity>' and '</entity>'"
   measure: 'cos' # measure: {'cos': cosine, 'ip': inner-product, 'l2': eucridean}
+  temperature: 1.0 # temperature: temperature for ranging similarity
   negative: 'inbatch' # negative: {'inbatch': in-batch sampling, 'dense': inbatch+hard negative with DPR, 'bm25': inbatch+hard negative with BM25}
   top_k: 10 # top_k: Number of hard negative samples
   prev_path: null # Pretrained Model Path: Use None if no pretrained model is being used
