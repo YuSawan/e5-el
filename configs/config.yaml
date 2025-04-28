@@ -4,7 +4,7 @@ model:
   model_max_length: 512
   add_nil: true
   nil_label: '[NIL]'
-  nil_description: '該当するエンティティが存在しません。"
+  nil_description: '該当するエンティティが存在しません。'
   start_ent_token: '<company>'
   end_ent_token: '</company>'
   task_description: "Given a Japanese news article, retrieve entity descriptions that are relevant to the mention located between special tokens '<company>' and '</company>'"
