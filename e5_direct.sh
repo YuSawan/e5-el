@@ -26,3 +26,4 @@ uv run python src/cli/run.py \
     --output_dir ${base_output_dir}/direct \
     --run_name ${base_output_dir}/direct
 done
+done
