@@ -26,6 +26,7 @@ from src.retriever import DenseRetriever
 from src.training import EntityLinkingTrainer, LoggerCallback, setup_logger
 
 logger = logging.getLogger(__name__)
+TOKEN = os.environ.get('TOKEN', True)
 
 
 def main(args: DatasetArguments, model_args: ModelArguments, training_args: TrainingArguments) -> None:
@@ -42,10 +43,10 @@ def main(args: DatasetArguments, model_args: ModelArguments, training_args: Trai
         tokenizer = AutoTokenizer.from_pretrained(model_args.prev_path)
         model = AutoModel.from_pretrained(model_args.prev_path)
     else:
-        config = AutoConfig.from_pretrained(model_args.model_name)
-        tokenizer = AutoTokenizer.from_pretrained(model_args.model_name, model_max_length=model_args.model_max_length)
+        config = AutoConfig.from_pretrained(model_args.model_name, token=TOKEN)
+        tokenizer = AutoTokenizer.from_pretrained(model_args.model_name, model_max_length=model_args.model_max_length, token=TOKEN)
         tokenizer.add_tokens([model_args.start_ent_token, model_args.end_ent_token])
-        model = AutoModel.from_pretrained(model_args.model_name, config=config)
+        model = AutoModel.from_pretrained(model_args.model_name, config=config, token=TOKEN)
         if model.config.vocab_size != len(tokenizer):
             model.resize_token_embeddings(len(tokenizer))
 
