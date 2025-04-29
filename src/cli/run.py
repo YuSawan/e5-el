@@ -46,7 +46,7 @@ def main(args: DatasetArguments, model_args: ModelArguments, training_args: Trai
     else:
         config = AutoConfig.from_pretrained(model_args.model_name, token=TOKEN)
         tokenizer = AutoTokenizer.from_pretrained(model_args.model_name, model_max_length=model_args.model_max_length, token=TOKEN)
-        tokenizer.add_tokens([model_args.start_ent_token, model_args.end_ent_token])
+        tokenizer.add_tokens([model_args.start_ent_token, model_args.end_ent_token, model_args.nil_label])
         model = AutoModel.from_pretrained(model_args.model_name, config=config, token=TOKEN)
         if model.config.vocab_size != len(tokenizer):
             model.resize_token_embeddings(len(tokenizer))
