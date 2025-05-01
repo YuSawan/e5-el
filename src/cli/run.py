@@ -29,13 +29,13 @@ logger = logging.getLogger(__name__)
 TOKEN = os.environ.get('TOKEN', True)
 
 
-def main(args: DatasetArguments, model_args: ModelArguments, training_args: TrainingArguments) -> None:
+def main(data_args: DatasetArguments, model_args: ModelArguments, training_args: TrainingArguments) -> None:
     setup_logger(training_args)
     logger.warning(
         f"process rank: {training_args.local_rank}, device: {training_args.device}, n_gpu: {training_args.n_gpu}, "
         + f"distributed training: {bool(training_args.local_rank != -1)}, 16-bits training: {training_args.fp16}"
     )
-    logger.info(f"args: {args}")
+    logger.info(f"args: {data_args}")
     logger.info(f"model_args: {model_args}")
     logger.info(f"training args: {training_args}")
 
@@ -46,33 +46,33 @@ def main(args: DatasetArguments, model_args: ModelArguments, training_args: Trai
     else:
         config = AutoConfig.from_pretrained(model_args.model_name, token=TOKEN)
         tokenizer = AutoTokenizer.from_pretrained(model_args.model_name, model_max_length=model_args.model_max_length, token=TOKEN)
-        tokenizer.add_tokens([model_args.start_ent_token, model_args.end_ent_token, model_args.nil_label])
+        tokenizer.add_tokens([data_args.start_ent_token, data_args.end_ent_token, data_args.nil_label])
         model = AutoModel.from_pretrained(model_args.model_name, config=config, token=TOKEN)
         if model.config.vocab_size != len(tokenizer):
             model.resize_token_embeddings(len(tokenizer))
 
-    cache_dir = args.cache_dir or get_temporary_cache_files_directory()
+    cache_dir = model_args.cache_dir or get_temporary_cache_files_directory()
     dictionary = EntityDictionary(
         tokenizer=tokenizer,
-        dictionary_path=args.dictionary_file,
+        dictionary_path=data_args.dictionary_file,
         cache_dir=cache_dir,
         training_arguments=training_args,
-        nil={"name": model_args.nil_label, "description": model_args.nil_description} if model_args.add_nil else None
+        nil={"name": data_args.nil_label, "description": data_args.nil_description} if data_args.add_nil else None
     )
 
     raw_datasets = read_dataset(
-        args.train_file,
-        args.validation_file,
-        args.test_file,
+        data_args.train_file,
+        data_args.validation_file,
+        data_args.test_file,
         cache_dir
     )
     preprocessor = Preprocessor(
         tokenizer,
         dictionary.entity_ids,
-        ent_start_token=model_args.start_ent_token,
-        ent_end_token=model_args.end_ent_token,
-        task_description=model_args.task_description,
-        remove_nil=False if model_args.add_nil else True
+        ent_start_token=data_args.start_ent_token,
+        ent_end_token=data_args.end_ent_token,
+        task_description=data_args.task_description,
+        remove_nil=False if data_args.add_nil else True
     )
     splits = get_splits(raw_datasets, preprocessor, training_args)
 

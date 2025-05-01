@@ -21,24 +21,23 @@ class DatasetArguments:
     train_file : str
     validation_file : str
     test_file: str
-    cache_dir: Optional[str]
-
-
-@dataclass
-class ModelArguments:
-    """Model arguments."""
-    model_name: str
-    model_max_length: int
     add_nil: bool
     nil_label: str
     nil_description: str
     start_ent_token: str
     end_ent_token: str
     task_description: str
+
+@dataclass
+class ModelArguments:
+    """Model arguments."""
+    model_name: str
+    model_max_length: int
     measure: str
     temperature: float
     negative: str
     top_k: int
+    cache_dir: Optional[str]
     prev_path: Optional[str]
 
 
