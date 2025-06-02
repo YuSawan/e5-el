@@ -25,18 +25,21 @@ def evaluate(model: PreTrainedModel, dataset: Dataset, retriever: DenseRetriever
         _, batch_indices = retriever.search_knn(query, top_k=100)
         for idxs, indices in zip(labels, batch_indices):
             true += 1
-            if dictionary[idxs[0]].id in indices:
-                tp_100 += 1
-                if dictionary[idxs[0]].id in indices[:50]:
-                    tp_50 += 1
-                    if dictionary[idxs[0]].id in indices[:20]:
+            label = [dictionary[idx].id for idx in idxs]
+            for i, ind in enumerate(indices):
+                if ind in label:
+                    tp_100 += 1
+                    if i == 0:
+                        tp_1 += 1
+                    if i < 5:
+                        tp_5 += 1
+                    if i < 10:
+                        tp_10 += 1
+                    if i < 20:
                         tp_20 += 1
-                        if dictionary[idxs[0]].id in indices[:10]:
-                            tp_10 += 1
-                            if dictionary[idxs[0]].id in indices[:5]:
-                                tp_5 += 1
-                                if dictionary[idxs[0]].id in indices[:1]:
-                                    tp_1 += 1
+                    if i < 50:
+                        tp_50 += 1
+                    break
     pbar.close()
 
     return {
